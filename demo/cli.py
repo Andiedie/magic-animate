@@ -10,14 +10,13 @@ from io import BytesIO
 import tempfile
 from demo.animate import MagicAnimate
 import numpy as np
+from pathlib import Path
 
 animator = MagicAnimate()
 
 while True:
     try:
         line = sys.stdin.readline()
-        if not line:
-            break
 
         data = json.loads(line)
         img_data = data['image']
@@ -42,8 +41,10 @@ while True:
 
         result_path = animator(image, pose_file_path, seed, steps, guidance_scale, size)
 
+        result_path = Path.cwd().joinpath(result_path).resolve().absolute()
+
         os.remove(pose_file_path)
 
-        print('data:' + json.dumps({'result': result_path}))
+        print('data:' + json.dumps({'result': str(result_path)}))
     except Exception as e:
         print('data:' + json.dumps({'err': traceback.format_exc()}))
