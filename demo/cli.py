@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 import traceback
 import urllib.request
@@ -40,6 +41,8 @@ while True:
             urllib.request.urlretrieve(pose_data, pose_file_path)
 
         result_path = animator(image, pose_file_path, seed, steps, guidance_scale, size)
+
+        os.remove(pose_file_path)
 
         print('data:' + json.dumps({'result': result_path}))
     except Exception as e:
