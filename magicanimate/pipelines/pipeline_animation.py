@@ -276,7 +276,7 @@ class AnimationPipeline(DiffusionPipeline):
         latents = rearrange(latents, "b c f h w -> (b f) c h w")
         # video = self.vae.decode(latents).sample
         video = []
-        for frame_idx in tqdm(range(latents.shape[0]), disable=(rank!=0)):
+        for frame_idx in tqdm(range(latents.shape[0]), disable=(rank!=0), desc='decode'):
             if decoder_consistency is not None:
                 video.append(decoder_consistency(latents[frame_idx:frame_idx+1]))
             else:
@@ -656,7 +656,7 @@ class AnimationPipeline(DiffusionPipeline):
         context_scheduler = get_context_scheduler(context_schedule)
         
         # Denoising loop
-        for i, t in tqdm(enumerate(timesteps), total=len(timesteps), disable=(rank!=0)):
+        for i, t in tqdm(enumerate(timesteps), total=len(timesteps), disable=(rank!=0), desc='denoise'):
             if num_actual_inference_steps is not None and i < num_inference_steps - num_actual_inference_steps:
                 continue
 
