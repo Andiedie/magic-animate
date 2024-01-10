@@ -125,7 +125,7 @@ class MagicAnimate():
         
         print("Initialization Done!")
         
-    def __call__(self, source_image, motion_sequence, random_seed, step, guidance_scale, size=512):
+    def __call__(self, source_image, motion_sequence, random_seed, step, guidance_scale, size=512, progress_callback=None):
             prompt = n_prompt = ""
             random_seed = int(random_seed)
             step = int(step)
@@ -169,6 +169,7 @@ class MagicAnimate():
                 reference_control_writer = self.reference_control_writer,
                 reference_control_reader = self.reference_control_reader,
                 source_image             = source_image,
+                progress_callback=progress_callback
             ).videos
 
             # source_images = np.array([source_image] * original_length)

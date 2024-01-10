@@ -270,7 +270,7 @@ class AnimationPipeline(DiffusionPipeline):
 
         return text_embeddings
 
-    def decode_latents(self, latents, rank, decoder_consistency=None):
+    def decode_latents(self, latents, rank, decoder_consistency=None, progress_callback=None):
         video_length = latents.shape[2]
         latents = 1 / 0.18215 * latents
         latents = rearrange(latents, "b c f h w -> (b f) c h w")
@@ -281,6 +281,8 @@ class AnimationPipeline(DiffusionPipeline):
                 video.append(decoder_consistency(latents[frame_idx:frame_idx+1]))
             else:
                 video.append(self.vae.decode(latents[frame_idx:frame_idx+1]).sample)
+            if progress_callback:
+                progress_callback('decode', frame_idx + 1, range(latents.shape[0]))
         video = torch.cat(video)
         video = rearrange(video, "(b f) c h w -> b c f h w", f=video_length)
         video = (video / 2 + 0.5).clamp(0, 1)
@@ -552,7 +554,8 @@ class AnimationPipeline(DiffusionPipeline):
         reference_control_writer = None,
         reference_control_reader = None,
         source_image: str = None,
-        decoder_consistency = None, 
+        decoder_consistency = None,
+        progress_callback=None,
         **kwargs,
     ):
         """
@@ -780,6 +783,9 @@ class AnimationPipeline(DiffusionPipeline):
                 dist.barrier()
             
             reference_control_writer.clear()
+
+            if progress_callback:
+                progress_callback('denoise', i + 1, len(timesteps))
 
         interpolation_factor = 1
         latents = self.interpolate_latents(latents, interpolation_factor, device)
