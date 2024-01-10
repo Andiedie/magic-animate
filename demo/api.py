@@ -25,6 +25,8 @@ def ping():
 
 @app.post('/invoke')
 def invoke():
+    global_dict['progress'] = 0
+
     data = request.get_json()
     img_data = data['image']
     pose_data = data['pose']
@@ -66,6 +68,3 @@ def progress():
     return {
         'progress': global_dict['progress']
     }
-
-
-app.run(host='0.0.0.0', port=34567, debug=False)

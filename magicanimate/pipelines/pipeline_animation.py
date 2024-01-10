@@ -660,6 +660,7 @@ class AnimationPipeline(DiffusionPipeline):
         
         # Denoising loop
         for i, t in tqdm(enumerate(timesteps), total=len(timesteps), disable=(rank!=0), desc='denoise'):
+            current_step = i
             if num_actual_inference_steps is not None and i < num_inference_steps - num_actual_inference_steps:
                 continue
 
@@ -785,12 +786,12 @@ class AnimationPipeline(DiffusionPipeline):
             reference_control_writer.clear()
 
             if progress_callback:
-                progress_callback('denoise', i + 1, len(timesteps))
+                progress_callback('denoise', current_step + 1, len(timesteps))
 
         interpolation_factor = 1
         latents = self.interpolate_latents(latents, interpolation_factor, device)
         # Post-processing
-        video = self.decode_latents(latents, rank, decoder_consistency=decoder_consistency)
+        video = self.decode_latents(latents, rank, decoder_consistency=decoder_consistency, progress_callback=progress_callback)
 
         if is_dist_initialized:
             dist.barrier()
